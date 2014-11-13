@@ -181,7 +181,9 @@ public:
         return result;
     }
 
-#ifdef QCOM_HARDWARE
+#ifdef USE_K3V2OEM1
+
+#else
     virtual status_t setBuffersSize(int size) {
         Parcel data, reply;
         data.writeInterfaceToken(IGraphicBufferProducer::getInterfaceDescriptor());
@@ -270,7 +272,9 @@ status_t BnGraphicBufferProducer::onTransact(
             reply->writeInt32(res);
             return NO_ERROR;
         } break;
-#ifdef QCOM_HARDWARE
+#ifdef USE_K3V2OEM1
+
+#else
         case SET_BUFFERS_SIZE: {
             CHECK_INTERFACE(IGraphicBufferProducer, data, reply);
             int size = data.readInt32();

@@ -191,7 +191,9 @@ status_t BufferQueue::setBufferCount(int bufferCount) {
     return NO_ERROR;
 }
 
-#ifdef QCOM_HARDWARE
+#ifdef USE_K3V2OEM1
+
+#else
 status_t BufferQueue::setBuffersSize(int size) {
     ST_LOGV("setBuffersSize: size=%d", size);
     Mutex::Autolock lock(mMutex);

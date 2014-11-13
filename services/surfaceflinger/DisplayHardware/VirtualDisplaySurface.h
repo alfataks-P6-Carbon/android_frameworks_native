@@ -105,7 +105,9 @@ private:
     virtual status_t connect(const sp<IBinder>& token,
             int api, bool producerControlledByApp, QueueBufferOutput* output);
     virtual status_t disconnect(int api);
-#ifdef QCOM_HARDWARE
+#ifdef USE_K3V2OEM1
+
+#else
     virtual status_t setBuffersSize(int size);
 #endif
 

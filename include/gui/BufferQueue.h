@@ -207,13 +207,15 @@ public:
     // connected to the specified producer API.
     virtual status_t disconnect(int api);
 
-#ifdef QCOM_HARDWARE
     // setBufferSize enables us to specify user defined sizes for the buffers
     // that need to be allocated by surfaceflinger for its client. This is
     // useful for cases where the client doesn't want the gralloc to calculate
     // buffer size. client should reset this value to 0, if it wants gralloc
     // to calculate the size for the buffer. this will take effect from next
     // dequeue buffer.
+#ifdef USE_K3V2OEM1
+
+#else
     virtual status_t setBuffersSize(int size);
 #endif
 

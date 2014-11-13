@@ -447,7 +447,9 @@ status_t VirtualDisplaySurface::disconnect(int api) {
     return mSource[SOURCE_SINK]->disconnect(api);
 }
 
-#ifdef QCOM_HARDWARE
+#ifdef USE_K3V2OEM1
+
+#else
 status_t VirtualDisplaySurface::setBuffersSize(int size) {
    return mSource[SOURCE_SINK]->setBuffersSize(size);
 }

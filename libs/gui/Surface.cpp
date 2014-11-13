@@ -65,7 +65,11 @@ Surface::Surface(
     mReqHeight = 0;
     mReqFormat = 0;
     mReqUsage = 0;
+#ifdef USE_K3V2OEM1
+
+#else
     mReqSize = 0;
+#endif
     mTimestamp = NATIVE_WINDOW_TIMESTAMP_AUTO;
     mCrop.clear();
 #ifdef QCOM_BSP
@@ -394,6 +398,9 @@ int Surface::query(int what, int* value) const {
                 }
                 return err;
             }
+#ifdef USE_K3V2OEM1
+
+#else
             case NATIVE_WINDOW_CONSUMER_USAGE_BITS: {
                 status_t err = NO_ERROR;
                 err = mGraphicBufferProducer->query(what, value);
@@ -404,6 +411,7 @@ int Surface::query(int what, int* value) const {
                     return err;
                 }
             }
+#endif
         }
     }
     return mGraphicBufferProducer->query(what, value);
@@ -446,7 +454,9 @@ int Surface::perform(int operation, va_list args)
     case NATIVE_WINDOW_SET_BUFFERS_FORMAT:
         res = dispatchSetBuffersFormat(args);
         break;
-#ifdef QCOM_HARDWARE
+#ifdef USE_K3V2OEM1
+
+#else
     case NATIVE_WINDOW_SET_BUFFERS_SIZE:
         res = dispatchSetBuffersSize(args);
         break;
@@ -526,7 +536,9 @@ int Surface::dispatchSetBuffersFormat(va_list args) {
     return setBuffersFormat(f);
 }
 
-#ifdef QCOM_HARDWARE
+#ifdef USE_K3V2OEM1
+
+#else
 int Surface::dispatchSetBuffersSize(va_list args) {
     int size = va_arg(args, int);
     return setBuffersSize(size);
@@ -590,7 +602,11 @@ int Surface::disconnect(int api) {
         mReqWidth = 0;
         mReqHeight = 0;
         mReqUsage = 0;
+#ifdef USE_K3V2OEM1
+
+#else
         mReqSize = 0;
+#endif
         mCrop.clear();
         mScalingMode = NATIVE_WINDOW_SCALING_MODE_FREEZE;
         mTransform = 0;
@@ -691,7 +707,9 @@ int Surface::setBuffersFormat(int format)
     return NO_ERROR;
 }
 
-#ifdef QCOM_HARDWARE
+#ifdef USE_K3V2OEM1
+
+#else
 int Surface::setBuffersSize(int size)
 {
     ATRACE_CALL();
@@ -859,7 +877,11 @@ status_t Surface::lock(
         }
 
         // figure out if we can copy the frontbuffer back
+#ifdef USE_K3V2OEM1
+
+#else
         int backBufferSlot(getSlotFromBufferLocked(backBuffer.get()));
+#endif
         const sp<GraphicBuffer>& frontBuffer(mPostedBuffer);
         const bool canCopyBack = (frontBuffer != 0 &&
                 backBuffer->width  == frontBuffer->width &&
@@ -867,6 +889,9 @@ status_t Surface::lock(
                 backBuffer->format == frontBuffer->format);
 
         if (canCopyBack) {
+#ifdef USE_K3V2OEM1
+	    const Region copyback(mDirtyRegion.subtract(newDirtyRegion));
+#else
             Mutex::Autolock lock(mMutex);
             Region oldDirtyRegion;
             for(int i = 0 ; i < NUM_BUFFER_SLOTS; i++ ) {
@@ -874,6 +899,7 @@ status_t Surface::lock(
                     oldDirtyRegion.orSelf(mSlots[i].dirtyRegion);
             }
             const Region copyback(oldDirtyRegion.subtract(newDirtyRegion));
+#endif
             if (!copyback.isEmpty())
                 copyBlt(backBuffer, frontBuffer, copyback);
         } else {
@@ -889,9 +915,18 @@ status_t Surface::lock(
 
         { // scope for the lock
             Mutex::Autolock lock(mMutex);
+#ifdef USE_K3V2OEM1
+	int backBufferSlot(getSlotFromBufferLocked(backBuffer.get()));
+	if (backBufferSlot >= 0) {
+	Region& dirtyRegion(mSlots[backBufferSlot].dirtyRegion);
+	mDirtyRegion.subtract(dirtyRegion);
+	dirtyRegion = newDirtyRegion;
+	}
+#else
             if (backBufferSlot >= 0) {
                mSlots[backBufferSlot].dirtyRegion = newDirtyRegion;
             }
+#endif
         }
 
         if (inOutDirtyBounds) {
